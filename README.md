@@ -129,7 +129,7 @@ public async Task Init()
 	await _inMemoryDatabaseService.CleanupCacheTable();
 }
 ```
-Testing entity framework: https://msdn.microsoft.com/en-us/library/dn314429%28v=vs.113%29.aspx?f=255&MSPPError=-2147217396
+Testing entity framework: https://msdn.microsoft.com/en-us/library/dn314429%28v=vs.113%29.aspx
 
 ### 10. Documentation
 
