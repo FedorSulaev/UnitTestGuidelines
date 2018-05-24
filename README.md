@@ -1,7 +1,7 @@
 # Unit testing reference
 
 ### 1. Goal of writing unit tests
-* Designing software components robustly
+* Designing software components robustly and maintaining high code quality
 * Detecting regressions (things that used to work but have unexpectedly stopped working)
 * Finding bugs (things that don’t work as you want them to)
 
@@ -11,7 +11,7 @@ Unit tests should isolate and verify behaviour of a specific small part of funct
 
 ### 3. How to add new unit tests
 
-Gunnebo.Tests project contains UnitTests folder with directories for different modules, add a new folder if you don't see your module/app there.
+Test classes exist a separate project referencing library under test. Tests project contains UnitTests folder with directories for different modules, add a new folder if you don't see your module/app there. The project can also have additional folders for utility classes (Fakes etc.).
 
 ![Readme Image1](ReadmeImage1.png)
 
@@ -102,7 +102,33 @@ public void Method_Condition_Expectation()
 }
 ```
 
-### 9. Documentation
+### 9. How to test method querying SQLite database
+To test method containing SQLite requests you can use ```InMemoryDatabaseService``` class, this class implements ```IDatabaseService``` interface and allows to use all SQLite operations in memory without creating a persistent db file. Below is a semple setup for a test db, this code recreates tables and cleans up db before each test:
+
+```
+private IDatabaseService _inMemoryDatabaseService;
+
+[SetUp]
+public async Task Init()
+{
+	if (_inMemoryDatabaseService == null)
+	{
+		_inMemoryDatabaseService = new InMemoryDatabaseService();
+		await _inMemoryDatabaseService.InitializeConnection(null, null);
+		await _inMemoryDatabaseService.InitializeTables(new[]
+		{
+			typeof(PersonManagerAppUserEntity),
+			typeof(UserEntity),
+			typeof(PersonManagerApp),
+			typeof(Policy),
+			typeof(PossiblePolicyValue)
+		});
+	}
+	await _inMemoryDatabaseService.CleanupCacheTable();
+}
+```
+
+### 10. Documentation
 
 NUnit 3 documentation wiki: https://github.com/nunit/docs/wiki/NUnit-Documentation
 Moq documentation: https://github.com/Moq/moq4/wiki/Quickstart
