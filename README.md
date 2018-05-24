@@ -95,127 +95,127 @@ If ReSharper is not available you mignt want to install VS extension for NUnit: 
 
 ### 8. How to test large methods
 A common issue when adding unit tests to existing code is that method under tests is large and does multiple things, most of the time the first step before testing, in this case should be refactoring. Usually large methods have local variables keeping state and multiple blocks of logic changing those variables and if/else statements:
-```
+```C#
 // Before refactoring - bad, one large method doing a lot of checks and saving db entry
 
 public bool SaveUser(User user)
 {
-    bool isSaved = false;
+    	bool isSaved = false;
 	if(string.IsNullOrEmpty(user.Name))
 	{
-        return false;
+        	return false;
 	}
-    if(string.IsNullOrEmpty(user.Password))
-    {
-        return false;
-    }
-    if(_db.Users.Any(u => u.username == user.Username))
-    {
-        return false;
-    }
-    try
-    {
-        _db.Users.Add(user);
-        _db.Save();
-        isSaved = true;
-    }
-    catch(Exception ex)
-    {
-        isSaved = false;
-    }
-    finally
-    {
-        return isSaved;
-    }
+    	if(string.IsNullOrEmpty(user.Password))
+    	{
+        	return false;
+    	}
+    	if(_db.Users.Any(u => u.username == user.Username))
+    	{
+        	return false;
+    	}
+    	try
+    	{
+        	_db.Users.Add(user);
+        	_db.Save();
+        	isSaved = true;
+    	}
+    	catch(Exception ex)
+    	{
+        	isSaved = false;
+    	}
+    	finally
+    	{
+        	return isSaved;
+    	}
 }
 ```
 
 First refactoring should be done to separate logical blocks into different methods in the same class:
 
-```
+```C#
 // After refactoring - better, still not 100% unit testable, SaveUser method dependencies can not be mocked
 
 public bool SaveUser(User user)
 {
-    if (IsNameValid(user.Name)
-        && IsPasswordValid(user.Password)
-        && !DoesUserExist(user.Username))
-    {
-        return TrySavingUser(user);
-    }
-    return false;
+    	if (IsNameValid(user.Name)
+        	&& IsPasswordValid(user.Password)
+        	&& !DoesUserExist(user.Username))
+    	{
+        	return TrySavingUser(user);
+    	}
+    	return false;
 }
 
 public bool IsNameValid(string name)
 {
-    return !string.IsNullOrEmpty(name);
+    	return !string.IsNullOrEmpty(name);
 }
 
 public bool IsPasswordValid(string password)
 {
-    return !string.IsNullOrEmpty(password);
+    	return !string.IsNullOrEmpty(password);
 }
 
 public bool DoesUserExist(string username)
 {
-    return _db.Users.Any(u => u.username == user.Username);
+    	return _db.Users.Any(u => u.username == user.Username);
 }
 
 public bool TrySavingUser(user)
 {
-    try
-    {
-        _db.Users.Add(user);
-        _db.Save();
-        return true;
-    }
-    catch(Exception ex)
-    {
-        return false;
-    }
+    	try
+    	{
+        	_db.Users.Add(user);
+        	_db.Save();
+        	return true;
+    	}
+    	catch(Exception ex)
+    	{
+        	return false;
+    	}
 }
 ```
 
 Second step is to move methods that ```SaveUser``` depends on to separate specialized classes that can be mocked to unit test ```SaveUser```:
 
-```
+```C#
 // After more refactoring - best 100% unit test friendly
 
 public class UserManager : IUserManager
 {
-    private IValidationService _validationService;
-    private IUserDatabaseService _userDbService;
+    	private IValidationService _validationService;
+    	private IUserDatabaseService _userDbService;
 
-    public UserManager(IValidationService validationService, IUserDatabaseService userDbService)
-    {
-        _validationService = validationService;
-        _userDbService = userDbService;
-    }
+    	public UserManager(IValidationService validationService, IUserDatabaseService userDbService)
+    	{
+        	_validationService = validationService;
+        	_userDbService = userDbService;
+    	}
 
-    public bool SaveUser(User user)
-    {
-        if (_validationService.IsNameValid(user.Name)
-            && _validationService.IsPasswordValid(user.Password)
-            && !_userDbService.DoesUserExist(user.Username))
-        {
-            return _userDbService.TrySavingUser(user);
-        }
-        return false;
-    }
+    	public bool SaveUser(User user)
+    	{
+        	if (_validationService.IsNameValid(user.Name)
+            		&& _validationService.IsPasswordValid(user.Password)
+            		&& !_userDbService.DoesUserExist(user.Username))
+        	{
+            	return _userDbService.TrySavingUser(user);
+        	}
+        	return false;
+    	}
 }
 
 public interface IValidationService
 {
-    bool IsNameValid(string name);
+    	bool IsNameValid(string name);
 
-    bool IsPasswordValid(string password);
+    	bool IsPasswordValid(string password);
 }
 
 public interface IUserDatabaseService
 {
-    bool DoesUserExist(string username);
+    	bool DoesUserExist(string username);
 
-    bool TrySavingUser(User user);
+    	bool TrySavingUser(User user);
 }
 ```
 
@@ -233,7 +233,7 @@ public void Method_Condition_Expectation()
 ### 10. How to test method querying SQLite database
 To test method containing SQLite requests you can use ```InMemoryDatabaseService``` class, this class implements ```IDatabaseService``` interface and allows to use all SQLite operations in memory without creating a persistent db file. Below is a semple setup for a test db, this code recreates tables and cleans up db before each test:
 
-```
+```C#
 private IDatabaseService _inMemoryDatabaseService;
 
 [SetUp]
