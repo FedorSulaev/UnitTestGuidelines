@@ -7,7 +7,7 @@
 
 ### 2. What to test with unit tests
 
-Unit tests should isolate and verify behaviour of a specific small part of functionality of a class independantly of all other parts. Ideally unit test should be validating behaviour of one method of a class and all dependencies of this class should be replaced with mocks. If you can't isolate a method for unit testing, there is a high possibility that something is wrong with architecture or you're trying to write integration test instead of unit test.
+Unit tests should isolate and verify behaviour of a specific small part of functionality of a class independently of all other parts. Ideally unit test should be validating behaviour of one method of a class and all dependencies of this class should be replaced with mocks. If you can't isolate a method for unit testing, there is a high possibility that something is wrong with architecture or you're trying to write integration test instead of unit test.
 
 ![Readme Image6](ReadmeImage6.png)
 
