@@ -93,7 +93,133 @@ With ReSharper you can run tests from ReSharper menu, project context menu or ru
 
 If ReSharper is not available you mignt want to install VS extension for NUnit: https://stackoverflow.com/questions/43007761/how-to-run-nunit-tests-in-visual-studio-2017
 
-### 8. How to test methods using Xamarin.Forms libraries
+### 8. How to test large methods
+A common issue when adding unit tests to existing code is that method under tests is large and does multiple things, most of the time the first step before testing, in this case should be refactoring. Usually large methods have local variables keeping state and multiple blocks of logic changing those variables and if/else statements:
+```
+// Before refactoring - bad, one large method doing a lot of checks and saving db entry
+
+public bool SaveUser(User user)
+{
+    bool isSaved = false;
+	if(string.IsNullOrEmpty(user.Name))
+	{
+        return false;
+	}
+    if(string.IsNullOrEmpty(user.Password))
+    {
+        return false;
+    }
+    if(_db.Users.Any(u => u.username == user.Username))
+    {
+        return false;
+    }
+    try
+    {
+        _db.Users.Add(user);
+        _db.Save();
+        isSaved = true;
+    }
+    catch(Exception ex)
+    {
+        isSaved = false;
+    }
+    finally
+    {
+        return isSaved;
+    }
+}
+```
+
+First refactoring should be done to separate logical blocks into different methods in the same class:
+
+```
+// After refactoring - better, still not 100% unit testable, SaveUser method dependencies can not be mocked
+
+public bool SaveUser(User user)
+{
+    if (IsNameValid(user.Name)
+        && IsPasswordValid(user.Password)
+        && !DoesUserExist(user.Username))
+    {
+        return TrySavingUser(user);
+    }
+    return false;
+}
+
+public bool IsNameValid(string name)
+{
+    return !string.IsNullOrEmpty(name);
+}
+
+public bool IsPasswordValid(string password)
+{
+    return !string.IsNullOrEmpty(password);
+}
+
+public bool DoesUserExist(string username)
+{
+    return _db.Users.Any(u => u.username == user.Username);
+}
+
+public bool TrySavingUser(user)
+{
+    try
+    {
+        _db.Users.Add(user);
+        _db.Save();
+        return true;
+    }
+    catch(Exception ex)
+    {
+        return false;
+    }
+}
+```
+
+Second step is to move methods that ```SaveUser``` depends on to separate specialized classes that can be mocked to unit test ```SaveUser```:
+
+```
+// After more refactoring - best 100% unit test friendly
+
+public class UserManager : IUserManager
+{
+    private IValidationService _validationService;
+    private IUserDatabaseService _userDbService;
+
+    public UserManager(IValidationService validationService, IUserDatabaseService userDbService)
+    {
+        _validationService = validationService;
+        _userDbService = userDbService;
+    }
+
+    public bool SaveUser(User user)
+    {
+        if (_validationService.IsNameValid(user.Name)
+            && _validationService.IsPasswordValid(user.Password)
+            && !_userDbService.DoesUserExist(user.Username))
+        {
+            return _userDbService.TrySavingUser(user);
+        }
+        return false;
+    }
+}
+
+public interface IValidationService
+{
+    bool IsNameValid(string name);
+
+    bool IsPasswordValid(string password);
+}
+
+public interface IUserDatabaseService
+{
+    bool DoesUserExist(string username);
+
+    bool TrySavingUser(User user);
+}
+```
+
+### 9. How to test methods using Xamarin.Forms libraries
 When testing methods calling XF libraries common issue is that test fails with exception saying that Xamarin.Forms was not initialized. To fix this problem the test project contains a mock class for XF initialization it should be used before calling the method under test:
 ```C#
 [Test]
@@ -104,7 +230,7 @@ public void Method_Condition_Expectation()
 }
 ```
 
-### 9. How to test method querying SQLite database
+### 10. How to test method querying SQLite database
 To test method containing SQLite requests you can use ```InMemoryDatabaseService``` class, this class implements ```IDatabaseService``` interface and allows to use all SQLite operations in memory without creating a persistent db file. Below is a semple setup for a test db, this code recreates tables and cleans up db before each test:
 
 ```
@@ -129,9 +255,9 @@ public async Task Init()
 	await _inMemoryDatabaseService.CleanupCacheTable();
 }
 ```
-Testing entity framework: https://msdn.microsoft.com/en-us/library/dn314429%28v=vs.113%29.aspx
+Testing entity framework: https://docs.microsoft.com/en-us/ef/core/providers/in-memory/, https://msdn.microsoft.com/en-us/library/dn314429%28v=vs.113%29.aspx
 
-### 10. Documentation
+### 11. Documentation
 
 NUnit 3 documentation wiki: https://github.com/nunit/docs/wiki/NUnit-Documentation
 Moq documentation: https://github.com/Moq/moq4/wiki/Quickstart
