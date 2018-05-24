@@ -9,6 +9,8 @@
 
 Unit tests should isolate and verify behaviour of a specific small part of functionality of a class independantly of all other parts. Ideally unit test should be validating behaviour of one method of a class and all dependencies of this class should be replaced with mocks. If you can't isolate a method for unit testing, there is a high possibility that something is wrong with architecture or you're trying to write integration test instead of unit test.
 
+![Readme Image6](ReadmeImage6.png)
+
 ### 3. How to add new unit tests
 
 Test classes exist a separate project referencing library under test. Tests project contains UnitTests folder with directories for different modules, add a new folder if you don't see your module/app there. The project can also have additional folders for utility classes (Fakes etc.).
