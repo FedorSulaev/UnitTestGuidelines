@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <SnippetTypes>
+        <SnippetType>Expansion</SnippetType>
+      </SnippetTypes>
+      <Title>NUnit Test Method</Title>
+      <Shortcut>test</Shortcut>
+      <Description>Code snippet for an NUnit test method following the naming convention When_MethodName_Given_Condition_Then_Expectation.</Description>
+      <Author></Author>
+    </Header>
+    <Snippet>
+      <Imports>
+        <Import>
+          <Namespace>NUnit.Framework.TestAttribute</Namespace>
+        </Import>
+      </Imports>
+      <References>
+      </References>
+      <Declarations>
+        <Literal>
+          <ID>MethodName</ID>
+          <ToolTip>Describe the unit that will be tested.</ToolTip>
+          <Default>MethodName</Default>
+        </Literal>
+        <Literal>
+          <ID>Condition</ID>
+          <ToolTip>Describe the initial state or preconditions.</ToolTip>
+          <Default>Condition</Default>
+        </Literal>
+        <Literal>
+          <ID>Expectation</ID>
+          <ToolTip>Describe the expected behaviour or outcome.</ToolTip>
+          <Default>Expectation</Default>
+        </Literal>
+      </Declarations>
+      <Code Language="csharp"><![CDATA[[Test]
+      public void When_$MethodName$_Given_$Condition$_Then_$Expectation$()
+      {
+          // Arrange
+          $end$
+          // Act
+
+          // Assert
+          
+      }]]></Code>
+    </Snippet>
+  </CodeSnippet>
+</CodeSnippets>
