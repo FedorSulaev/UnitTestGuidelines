@@ -21,21 +21,29 @@ Every class has it's own file for tests, naming scheme is ```[ClassName]Tests```
 
 ![Readme Image2](ReadmeImage2.png)
 
-To add new unit test for the class add attributes ```[TestFixture]``` for the test class and ```[Test]``` for the test method. Naming convention for unit tests is ```[Unit under test (method name)]_[Condition for the test]_[Expected result]```.
+To add new unit test for the class add attributes ```[TestFixture]``` for the test class and ```[Test]``` for the test method. Naming convention for unit tests is ```When_[Unit under test (method name)]_Given_[Condition for the test]_Then_[Expected result]```.
 ```C#
 [TestFixture]
 public class ClassNameTests
 {
 	[Test]
-	public async Task MethodName_Condition_Expectation()
+	public async Task When_MethodName_Given_Condition_Then_Expectation()
 	{
-
+		// Arrange
+		
+		// Act
+		
+		// Assert
 	}
 
 	[Test]
-	public void MethodName_Condition_Expectation()
+	public void When_MethodName_Given_Condition_Then_Expectation()
 	{
-
+		// Arrange
+		
+		// Act
+		
+		// Assert
 	}
 }
 ```
@@ -57,12 +65,13 @@ Moq library is used to isolate unit under test by replacing dependencies with mo
 
 ```C#
 [Test]
-public async Task MethodName_Condition_Expectation()
+public async Task When_MethodName_Given_Condition_Then_Expectation()
 {
+	// Arrange
 	IClassUnderTest service = new ClassUnderTest(_dependency1.Object, _dependency2.Object, _dependency3.Object);
-	
+	// Act
 	bool result = service.MethodName();
-
+	// Assert
 	Assert.That(result, Is.True);
 }
 ```
@@ -223,10 +232,13 @@ public interface IUserDatabaseService
 When testing methods calling XF libraries common issue is that test fails with exception saying that Xamarin.Forms was not initialized. To fix this problem the test project contains a mock class for XF initialization it should be used before calling the method under test:
 ```C#
 [Test]
-public void Method_Condition_Expectation()
+public void When_MethodName_Given_Condition_Then_Expectation()
 {
+	// Arrange
 	FormsMock.Init();
+	// Act
 	Device.BeginInvokeOnMainThread(() => { });
+	...
 }
 ```
 
